@@ -8,7 +8,7 @@
 using json = nlohmann::json;
 using namespace std;
 
-class add_log
+class employee_log
 {
 private:
     int logId;
@@ -17,12 +17,13 @@ private:
     string details;
     string isCompleted;
 public:
-    // add_log(/* args */);
-    // ~add_log();
+    // employee_log(/* args */);
+    // ~employee_log();
     void createLog();
+    void deleteLog();
 };
 
-void add_log::createLog() {
+void employee_log::createLog() {
     cout << "\n\t\t|-----------------------------------------------|\n";
     cout << "\t\t|\t Enter Log Details:\t                |\n";
     cout << "\t\t|-----------------------------------------------|\n";
@@ -44,12 +45,12 @@ void add_log::createLog() {
     cin >> isCompleted;
     
     //Give path as per your directory
-    const string filename = "F:/a Study/engg/sem-3/OOC/mini project/company-management-system/src/employee/employee_data.json";
+    const string filename = "./employee_data.json";
     json new_log = {
         {"id", logId},
         {"projectId", projectId},
         {"hoursWorked", HoursWorked},
-        {"Details", details}
+        {"details", details}
     };
 
     json data = json::array();
@@ -75,10 +76,61 @@ void add_log::createLog() {
 
 }
 
+void employee_log::deleteLog(){
+    int LogId;
+    cout << "\n\t\t|-----------------------------------------------|\n";
+    cout << "\t\t|\t Enter Log ID to Delete:\t        |\n";
+    cout << "\t\t|-----------------------------------------------|\n";
+    cout << "Enter Log ID: ";
+    cin >>  LogId;
+
+      const string filename = "./employee_data.json";
+    json data;
+
+    // Open and read the JSON file
+    ifstream infile(filename);
+    if (infile.is_open()) {
+        if (infile.peek() != ifstream::traits_type::eof()) {
+            infile >> data;
+        }
+        infile.close();
+    } else {
+        cout << "Unable to open file for reading!" << endl;
+        return;
+    }
+    bool logFound = false;
+    for (auto i = data.begin(); i != data.end(); i++)
+    {
+       if((*i)["id"] == LogId){
+        data.erase(i);
+        logFound = true;
+        break;
+       }
+    }
+    
+    if (logFound)
+    {
+        ofstream outfile(filename);
+        if (outfile.is_open()) {
+            outfile << data.dump(4);  // Save JSON with indentation for readability
+            outfile.close();
+            cout << "Log deleted successfully!" << endl;
+        } else {
+            cout << "Unable to open file for writing!" << endl;
+        }
+    } else {
+        cout << "Log ID not found!" << endl;
+    }
+    
+    
+
+}
+
 void employeeMenu(){
     int adminChoice;
 
-    add_log al;
+    int count=0;
+   employee_log al[20];
 
     do {
         cout << "\n\t\t|-----------------------------------------------|\n";
@@ -88,29 +140,36 @@ void employeeMenu(){
         cout << "\t\t|\t\t 1) ADD LOG                     |\n"; 
         cout << "\t\t|                                               |\n"; 
         cout << "\t\t|\t\t 2) REMOVE LOG                  |\n"; 
+        cout << "\t\t|                                               |\n";
+        cout << "\t\t|\t\t 2) EDIT LOG                    |\n"; 
+        cout << "\t\t|                                               |\n";
+        cout << "\t\t|\t\t 4) VIEW PROJECTS ASSIGNED      |\n"; 
         cout << "\t\t|                                               |\n"; 
-        cout << "\t\t|\t\t 3) VIEW PROJECTS ASSIGNED      |\n"; 
-        cout << "\t\t|                                               |\n"; 
-        cout << "\t\t|\t\t 4) EXIT                        |\n"; 
+        cout << "\t\t|\t\t 5) EXIT                        |\n"; 
         cout << "\t\t|-----------------------------------------------|\n";
 
         cin >> adminChoice;
 
         switch (adminChoice) {
         case 1:
-            al.createLog();
+            al[count].createLog();
+            count++;
             break;
         case 2:
-            cout << "Remove Log functionality is not implemented yet.\n";
+            al[count].deleteLog();
+            count++;
             break;
         case 3:
-            cout << "View Project assigned functionality is not implemented yet.\n";
+            cout << "Edit Log";
             break;
         case 4:
+            cout << "View Project assigned functionality is not implemented yet.\n";
+            break;
+        case 5:
             cout << "Heading back to main menu.\n";
             break;
         default:
             cout << "Invalid choice, please try again.\n";
         }
-    } while (adminChoice != 4);
+    } while (adminChoice != 5);
 }
