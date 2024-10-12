@@ -1,11 +1,5 @@
 #include <iostream>
 #include <string>
-#include <fstream>
- //Give path as per your directory
-#include "F:/a Study/engg/sem-3/OOC/mini project/company-management-system/json/single_include/nlohmann/json.hpp"
-#include "employee_main.hpp"
-
-using json = nlohmann::json;
 using namespace std;
 
 class employee_log
@@ -38,41 +32,11 @@ void employee_log::createLog() {
     cin >> HoursWorked;
 
     cout << "Enter Log Details: ";
-    cin.ignore();  // Ignore the newline character left in the input stream
+    cin.ignore();
     getline(cin, details);
 
     cout << "Projected completed? yes or no: ";
     cin >> isCompleted;
-    
-    //Give path as per your directory
-    const string filename = "./employee_data.json";
-    json new_log = {
-        {"id", logId},
-        {"projectId", projectId},
-        {"hoursWorked", HoursWorked},
-        {"details", details}
-    };
-
-    json data = json::array();
-
-    ifstream infile(filename);
-    if (infile.is_open()) {
-        if (infile.peek() != ifstream::traits_type::eof()) {
-            infile >> data;
-        }
-        infile.close();
-    }
-
-    data.push_back(new_log);
-
-    ofstream outfile(filename);
-    if (outfile.is_open()) {
-        outfile << data.dump(4);
-        outfile.close();
-        cout << "Contact added successfully!" << endl;
-    } else {
-        cout << "Unable to open file for writing!" << endl;
-    }
 
 }
 
@@ -83,54 +47,14 @@ void employee_log::deleteLog(){
     cout << "\t\t|-----------------------------------------------|\n";
     cout << "Enter Log ID: ";
     cin >>  LogId;
-
-      const string filename = "./employee_data.json";
-    json data;
-
-    // Open and read the JSON file
-    ifstream infile(filename);
-    if (infile.is_open()) {
-        if (infile.peek() != ifstream::traits_type::eof()) {
-            infile >> data;
-        }
-        infile.close();
-    } else {
-        cout << "Unable to open file for reading!" << endl;
-        return;
-    }
-    bool logFound = false;
-    for (auto i = data.begin(); i != data.end(); i++)
-    {
-       if((*i)["id"] == LogId){
-        data.erase(i);
-        logFound = true;
-        break;
-       }
-    }
     
-    if (logFound)
-    {
-        ofstream outfile(filename);
-        if (outfile.is_open()) {
-            outfile << data.dump(4);  // Save JSON with indentation for readability
-            outfile.close();
-            cout << "Log deleted successfully!" << endl;
-        } else {
-            cout << "Unable to open file for writing!" << endl;
-        }
-    } else {
-        cout << "Log ID not found!" << endl;
-    }
-    
-    
-
 }
 
 void employeeMenu(){
     int adminChoice;
 
     int count=0;
-   employee_log al[20];
+   employee_log al[200];
 
     do {
         cout << "\n\t\t|-----------------------------------------------|\n";
@@ -157,7 +81,7 @@ void employeeMenu(){
             break;
         case 2:
             al[count].deleteLog();
-            count++;
+            count--;
             break;
         case 3:
             cout << "Edit Log";
