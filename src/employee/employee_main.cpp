@@ -126,12 +126,12 @@ void employeeMenu() {
         cout << "\t\t|\t\t 6) EXIT                        |\n";
         cout << "\t\t|-----------------------------------------------|\n";
 
-        cin >> adminChoice;
+        cin >> adminChoice; 
 
         switch (adminChoice) {
             case 1:
                 logs[count].createLog();
-                count++;
+                count++; 
                 break;
             case 2:
                 cout << "Enter Log ID to Delete: ";
