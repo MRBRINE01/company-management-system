@@ -1,8 +1,144 @@
 #include <iostream>
+#include <vector>
+#include <string>
 
 using namespace std;
 
+class Employee {
+public:
+    int id;
+    string name;
+    string role;
+    string assignProject;
+
+
+    Employee(int id, string name, string role) {
+        //When you use this->, you're explicitly referring to a member (like a variable or method) of the current object that called the function.
+        this->id = id;
+        this->name = name;
+        this->role = role;
+    }
+
+    void displayEmployee() {
+        cout << "ID: " << id << ", Name: " << name << ", Role: " << role << endl;
+    }
+};
+
+class Project {
+public:
+    int id;
+    string name;
+    string description;
+    int assignedEmployeeId;
+    string assignedEmployee;
+
+    Project(int id, string name, string description, int assignedEmployeeId) {
+        this->id = id;
+        this->name = name;
+        this->description = description;
+        this->assignedEmployeeId = assignedEmployeeId; 
+    }
+
+    void displayProject() {
+        cout << "ID: " << id << ", Name: " << name << ", Description: " << description << endl;
+    }
+};
+
+class Admin {
+private:
+    vector<Employee> employees;
+    vector<Project> projects;
+
+public:
+    void addEmployee();
+    void removeEmployee();
+    void viewEmployees();
+    void addProject();
+    void viewProjects();
+};
+
+void Admin::addEmployee() {
+    int id;
+    string name, role;
+
+    cout << "\nEnter Employee ID: ";
+    cin >> id;
+    cin.ignore();
+    cout << "Enter Employee Name: ";
+    getline(cin, name);
+    cout << "Enter Employee Role: ";
+    getline(cin, role);
+
+    employees.push_back(Employee(id, name, role));
+    cout << "Employee added successfully!\n";
+}
+
+void Admin::removeEmployee() {
+    int id;
+    cout << "\nEnter Employee ID to Remove: ";
+    cin >> id;
+
+    bool found = false;
+    for (size_t i = 0; i < employees.size(); i++) {
+        if (employees[i].id == id) {
+            employees.erase(employees.begin() + i);
+            cout << "Employee with ID " << id << " removed successfully!\n";
+            found = true;
+            break;
+        }
+    }
+
+    if (!found) {
+        cout << "Employee with ID " << id << " not found.\n";
+    }
+}
+
+void Admin::viewEmployees() {
+    if (employees.empty()) {
+        cout << "No employees to display.\n";
+    } else {
+        cout << "\nList of Employees:\n";
+        for (int i = 0; i < employees.size(); i++) {
+            employees[i].displayEmployee();
+        }
+    }
+}
+
+void Admin::addProject() {
+    int id;
+    string name, description;
+    int budget;
+    int emp_id;
+
+    cout << "\nEnter Project ID: ";
+    cin >> id;
+    cin.ignore(); 
+    cout << "Enter Project Name: ";
+    getline(cin, name);
+    cout << "Enter Project Description: ";
+    getline(cin, description);
+    cout << "Enter the budget of the project: ";
+    cin >> budget;
+    cout << "Enter the employee id you want to assign this project to: ";
+    cin >> emp_id;
+
+    projects.push_back(Project(id, name, description, emp_id));
+    cout << "Project added successfully!\n";
+}
+
+void Admin::viewProjects() {
+    if (projects.empty()) {
+        cout << "No projects to display.\n";
+    } else {
+        cout << "\nList of Projects:\n";
+        for (size_t i = 0; i < projects.size(); i++) {
+            projects[i].displayProject();
+        }
+    }
+}
+
 void adminMenu() {
+    Admin admin;
     int adminChoice;
 
     do {
@@ -18,7 +154,7 @@ void adminMenu() {
         cout << "\t\t|                                               |\n"; 
         cout << "\t\t|\t\t 4) ADD PROJECT                 |\n"; 
         cout << "\t\t|                                               |\n"; 
-        cout << "\t\t|\t\t 5) VIEW PROJECT                |\n"; 
+        cout << "\t\t|\t\t 5) VIEW PROJECTS               |\n"; 
         cout << "\t\t|                                               |\n"; 
         cout << "\t\t|\t\t 6) EXIT                        |\n"; 
         cout << "\t\t|-----------------------------------------------|\n";
@@ -27,22 +163,27 @@ void adminMenu() {
 
         switch (adminChoice) {
         case 1:
-            cout << "Add Employee functionality is not implemented yet.\n";
+            admin.addEmployee();
             break;
         case 2:
-            cout << "Remove Employee functionality is not implemented yet.\n";
+            admin.removeEmployee();
             break;
         case 3:
-            cout << "View Employees functionality is not implemented yet.\n";
+            admin.viewEmployees();
             break;
         case 4:
-            cout << "Add Project functionality is not implemented yet.\n";
+            admin.addProject();
             break;
         case 5:
-            cout << "View Project functionality is not implemented yet.\n";
+            admin.viewProjects();
+            break;
+        case 6:
+            cout << "Exiting admin menu...\n";
             break;
         default:
             cout << "Invalid choice, please try again.\n";
         }
     } while (adminChoice != 6);
 }
+
+
