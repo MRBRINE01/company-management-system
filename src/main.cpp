@@ -20,7 +20,9 @@ int main() {
         cout << "\t\t|                                               |\n"; 
         cout << "\t\t|\t\t 2) EMPLOYEE                    |\n"; 
         cout << "\t\t|                                               |\n"; 
-        cout << "\t\t|\t\t 3) EXIT                        |\n"; 
+        cout << "\t\t|\t\t 3) GENERATE REPORT             |\n"; 
+        cout << "\t\t|                                               |\n"; 
+        cout << "\t\t|\t\t 4) EXIT                        |\n"; 
         cout << "\t\t|-----------------------------------------------|\n";
 
         cin >> mainMenuCh;
@@ -33,6 +35,8 @@ int main() {
             employeeMenu();
             break;
         case 3:
+            break;
+        case 4:
             cout << "Exiting the program. Goodbye!\n";
             break;
         default:

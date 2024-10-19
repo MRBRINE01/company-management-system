@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <vector>
 using namespace std;
 
 class employee_log {
@@ -11,6 +12,14 @@ private:
     string isCompleted;
 
 public:
+    employee_log(){};
+    employee_log(int logId, int projectId, int HoursWorked, string details, string isCompleted) {
+        this->logId = logId;
+        this->projectId = projectId;
+        this->HoursWorked = HoursWorked;
+        this->details = details;
+        this->isCompleted = isCompleted;
+    }
     void createLog();
     bool deleteLog(int logIdToDelete);
     bool editLog(int logIdToEdit);
@@ -104,7 +113,10 @@ void employeeMenu() {
     int adminChoice;
     int count = 0;
     bool flag;
-    employee_log logs[200];  // Array of employee_log objects
+
+    vector<employee_log> logs; 
+    employee_log newlog; 
+
     int logIdToEditOrDelete;
     int logIdToView;
 
@@ -128,35 +140,34 @@ void employeeMenu() {
 
         cin >> adminChoice; 
 
+        flag = false;
+
         switch (adminChoice) {
             case 1:
-                logs[count].createLog();
-                count++; 
+                newlog.createLog();
+                logs.push_back(newlog);
                 break;
             case 2:
                 cout << "Enter Log ID to Delete: ";
                 cin >> logIdToEditOrDelete;
-                for (int i = 0; i < count; i++) {
-                    if (logs[i].deleteLog(logIdToEditOrDelete)) {
-                        // Shift remaining logs up after deletion
-                        for (int j = i; j < count - 1; j++) {
-                            logs[j] = logs[j + 1];
-                        }
+                for (auto i = logs.begin(); i != logs.end(); ++i) {
+                    if (i->deleteLog(logIdToEditOrDelete)) {
+                        logs.erase(i);  
                         flag = true;
-                        count--;
                         break;
                     }
+                }
                     if (!flag)
                 {
                     cout << "Log with ID " << logIdToEditOrDelete << " not found.\n";
                 }
-                }
+                
                 break;
             case 3:
                 cout << "Enter Log ID to Edit: ";
                 cin >> logIdToEditOrDelete;
-                for (int i = 0; i < count; i++) {
-                    flag = logs[i].editLog(logIdToEditOrDelete);
+                for (auto& log : logs) { //using auto& ensures that you're working with the actual employee_log objects and not copies
+                    flag = log.editLog(logIdToEditOrDelete);
                 }
                 if (!flag)
                 {
@@ -165,15 +176,15 @@ void employeeMenu() {
                 break;
             case 4:
                 cout << "Displaying all logs:\n";
-                for (int i = 0; i < count; i++) {
-                    logs[i].displayLog();
+                 for (auto& log : logs) { //using auto& ensures that you're working with the actual employee_log objects and not copies
+                    log.displayLog();
                 }
                 break;
             case 5: 
                 cout << "Enter Log ID to View: ";
                 cin >> logIdToView;
-                for (int i = 0; i < count; i++) {
-                    flag = logs[i].viewLogById(logIdToView);
+                for (auto& log : logs) { //using auto& ensures that you're working with the actual employee_log objects and not copies
+                    flag = log.viewLogById(logIdToView);
                 }
                 if (!flag)
                 {

@@ -9,7 +9,7 @@ public:
     int id;
     string name;
     string role;
-    string assignProject;
+    vector<int> assignedProjects;
 
 
     Employee(int id, string name, string role) {
@@ -19,8 +19,23 @@ public:
         this->role = role;
     }
 
+    void assignProject(int projectId) {
+        assignedProjects.push_back(projectId);
+        cout << "Project ID " << projectId << " assigned to employee " << name << endl;
+    }
+
     void displayEmployee() {
         cout << "ID: " << id << ", Name: " << name << ", Role: " << role << endl;
+        if(assignedProjects.empty()){
+            cout << "No project assigned.\n";
+        }
+        else{
+            cout << "Assigned Projects: ";
+            for(auto projectId : assignedProjects){
+                cout << projectId << " ";
+            }
+            cout << endl;
+        }
     }
 };
 
@@ -110,20 +125,37 @@ void Admin::addProject() {
     int budget;
     int emp_id;
 
-    cout << "\nEnter Project ID: ";
-    cin >> id;
-    cin.ignore(); 
-    cout << "Enter Project Name: ";
-    getline(cin, name);
-    cout << "Enter Project Description: ";
-    getline(cin, description);
-    cout << "Enter the budget of the project: ";
-    cin >> budget;
     cout << "Enter the employee id you want to assign this project to: ";
     cin >> emp_id;
 
-    projects.push_back(Project(id, name, description, emp_id));
-    cout << "Project added successfully!\n";
+    bool employeeFound = false;
+
+    for(auto& employee : employees){
+        if(employee.id == emp_id){
+
+            employeeFound = true;
+
+            cout << "\nEnter Project ID: ";
+            cin >> id;
+            cin.ignore(); 
+            employee.assignProject(id);
+            cout << "Enter Project Name: ";
+            getline(cin, name);
+            cout << "Enter Project Description: ";
+            getline(cin, description);
+            cout << "Enter the budget of the project: ";
+            cin >> budget;
+
+            projects.push_back(Project(id, name, description, emp_id));
+            cout << "Project added successfully!\n";
+        }
+    }
+    if (!employeeFound)
+    {
+        cout << "No employee found with that id";
+    }
+    
+    cout << endl;
 }
 
 void Admin::viewProjects() {
@@ -158,7 +190,8 @@ void adminMenu() {
         cout << "\t\t|                                               |\n"; 
         cout << "\t\t|\t\t 6) EXIT                        |\n"; 
         cout << "\t\t|-----------------------------------------------|\n";
-
+        cout << endl;
+        cout << "Enter your choice: ";
         cin >> adminChoice;
 
         switch (adminChoice) {
