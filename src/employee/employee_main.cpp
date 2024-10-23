@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <fstream>
 using namespace std;
 
 class employee_log {
@@ -20,23 +21,96 @@ public:
         this->details = details;
         this->isCompleted = isCompleted;
     }
-    void createLog();
+    void createLog(int newLogId);
     bool deleteLog(int logIdToDelete);
     bool editLog(int logIdToEdit);
     void displayLog();
     bool viewLogById(int logIdToView);
     
     int getLogId() { return logId; }
+
+    void saveLogToFile() {
+        ofstream logFile("logs.txt", ios::app); // Open in append mode
+        if (logFile.is_open()) {
+            logFile << logId << "," << projectId << "," << HoursWorked << "," 
+                    << details << "," << isCompleted << endl;
+            logFile.close();
+        } else {
+            cout << "Unable to open log file for writing.\n";
+        }
+    }
+
+    // Static function to load logs from a file and populate the logs vector
+    static vector<employee_log> loadLogsFromFile(int &maxLogId) {
+        vector<employee_log> logs;
+        ifstream logFile("logs.txt");
+        maxLogId = 0;
+        if (logFile.is_open()) {
+            string line;
+            while (getline(logFile, line)) {
+                int logId, projectId, hours;
+                string details, isCompleted;
+                size_t pos = 0;
+
+                // Extracting the logId
+                pos = line.find(",");
+                logId = stoi(line.substr(0, pos));
+                line.erase(0, pos + 1);
+
+                // Extracting the projectId
+                pos = line.find(",");
+                projectId = stoi(line.substr(0, pos));
+                line.erase(0, pos + 1);
+
+                // Extracting HoursWorked
+                pos = line.find(",");
+                hours = stoi(line.substr(0, pos));
+                line.erase(0, pos + 1);
+
+                // Extracting the details
+                pos = line.find(",");
+                details = line.substr(0, pos);
+                line.erase(0, pos + 1);
+
+                // Extracting isCompleted
+                isCompleted = line;
+
+                // Create a new log object and add to the vector
+                employee_log log(logId, projectId, hours, details, isCompleted);
+                logs.push_back(log);
+                if (logId > maxLogId) {
+                    maxLogId = logId;
+                }
+            }
+            logFile.close();
+        } else {
+            cout << "Unable to open log file for reading.\n";
+        }
+        return logs;
+    }
+
+    // Update function to rewrite the logs to the file after any changes
+    static void updateLogFile(const vector<employee_log>& logs) {
+        ofstream logFile("logs.txt", ios::trunc); // Open in truncation mode (overwrite)
+        if (logFile.is_open()) {
+            for (const auto& log : logs) {
+                logFile << log.logId << "," << log.projectId << "," << log.HoursWorked << "," 
+                        << log.details << "," << log.isCompleted << endl;
+            }
+            logFile.close();
+        } else {
+            cout << "Unable to open log file for updating.\n";
+        }
+    }
 };
 
 // Function to create a new log entry
-void employee_log::createLog() {
+void employee_log::createLog(int newLogId) {
     cout << "\n\t\t|-----------------------------------------------|\n";
     cout << "\t\t|\t Enter Log Details:\t                |\n";
     cout << "\t\t|-----------------------------------------------|\n";
 
-    cout << "Enter Log ID: ";
-    cin >> logId;
+       logId = newLogId;
 
     cout << "Enter Project ID: ";
     cin >> projectId;
@@ -111,10 +185,11 @@ void employee_log::displayLog() {
 // Menu function for employee log management
 void employeeMenu() {
     int adminChoice;
-    int count = 0;
     bool flag;
+    int maxLogId = 0;
 
-    vector<employee_log> logs; 
+    // Load logs from file at the beginning
+    vector<employee_log> logs = employee_log::loadLogsFromFile(maxLogId);
     employee_log newlog; 
 
     int logIdToEditOrDelete;
@@ -144,8 +219,9 @@ void employeeMenu() {
 
         switch (adminChoice) {
             case 1:
-                newlog.createLog();
+                newlog.createLog(++maxLogId);
                 logs.push_back(newlog);
+                newlog.saveLogToFile();  // Save new log to file
                 break;
             case 2:
                 cout << "Enter Log ID to Delete: ";
@@ -157,40 +233,40 @@ void employeeMenu() {
                         break;
                     }
                 }
-                    if (!flag)
-                {
+                if (!flag) {
                     cout << "Log with ID " << logIdToEditOrDelete << " not found.\n";
+                } else {
+                    employee_log::updateLogFile(logs);  // Update the log file after deletion
                 }
-                
                 break;
             case 3:
                 cout << "Enter Log ID to Edit: ";
                 cin >> logIdToEditOrDelete;
-                for (auto& log : logs) { //using auto& ensures that you're working with the actual employee_log objects and not copies
+                for (auto& log : logs) {
                     flag = log.editLog(logIdToEditOrDelete);
+                    if (flag) break;
                 }
-                if (!flag)
-                {
+                if (!flag) {
                     cout << "Log with ID " << logIdToEditOrDelete << " not found.\n";
+                } else {
+                    employee_log::updateLogFile(logs);  
                 }
                 break;
             case 4:
                 cout << "Displaying all logs:\n";
-                 for (auto& log : logs) { //using auto& ensures that you're working with the actual employee_log objects and not copies
+                for (auto& log : logs) {
                     log.displayLog();
                 }
                 break;
             case 5: 
                 cout << "Enter Log ID to View: ";
                 cin >> logIdToView;
-                for (auto& log : logs) { //using auto& ensures that you're working with the actual employee_log objects and not copies
+                for (auto& log : logs) {
                     flag = log.viewLogById(logIdToView);
                 }
-                if (!flag)
-                {
+                if (!flag) {
                     cout << "Log with ID " << logIdToView << " not found.\n";
                 }
-                
                 break;
             case 6:
                 cout << "Exiting...\n";

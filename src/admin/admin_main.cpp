@@ -138,8 +138,22 @@ void Admin::addProject() {
 
             employeeFound = true;
 
-            cout << "\nEnter Project ID: ";
-            cin >> id;
+            bool projectExists = false;
+
+            do {
+                cout << "\nEnter Project ID: ";
+                cin >> id;
+
+                projectExists = false;
+                for (const auto& project : projects) {
+                    if (project.id == id) {
+                        projectExists = true;
+                        cout << "Project with ID " << id << " already exists. Please enter a unique Project ID.\n";
+                        break;
+                    }
+                }
+            } while (projectExists);
+
             cin.ignore();
             employee.assignProject(id);
             cout << "Enter Project Name: ";
@@ -257,6 +271,9 @@ void adminMenu() {
     Admin admin;
     admin.loadData();  // Load data when the program starts
     int adminChoice;
+
+    
+
 
     do {
         cout << "\n\t\t|-----------------------------------------------|\n";

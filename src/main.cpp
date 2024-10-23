@@ -7,6 +7,9 @@ using namespace std;
 int main() {
     int mainMenuCh;
 
+    string adminpass = "admin123";
+    string enteredpass;
+
     do {
         cout << "\n\t\t|-----------------------------------------------|\n";
         cout << "\t\t|                                               |\n"; 
@@ -29,7 +32,16 @@ int main() {
 
         switch (mainMenuCh) {
         case 1: 
-            adminMenu();
+            cout << "Enter the password for the Admin: ";
+            cin >> enteredpass;
+            if (enteredpass == adminpass)
+            {
+                cout << "Access successfully granted.";
+                adminMenu();
+            }
+            else{
+                cout << "Access Denied.";
+            }
             break;
         case 2:
             employeeMenu();
