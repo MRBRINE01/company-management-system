@@ -42,7 +42,7 @@ int main() {
         default:
             cout << "Invalid choice, please try again.\n";
         }
-    } while (mainMenuCh != 3);
+    } while (mainMenuCh != 4);
 
     return 0;
 }

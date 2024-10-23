@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <fstream>  // For file handling
 
 using namespace std;
 
@@ -10,7 +11,6 @@ public:
     string name;
     string role;
     vector<int> assignedProjects;
-
 
     Employee(int id, string name, string role) {
         //When you use this->, you're explicitly referring to a member (like a variable or method) of the current object that called the function.
@@ -26,12 +26,12 @@ public:
 
     void displayEmployee() {
         cout << "ID: " << id << ", Name: " << name << ", Role: " << role << endl;
-        if(assignedProjects.empty()){
+        if (assignedProjects.empty()) {
             cout << "No project assigned.\n";
         }
-        else{
+        else {
             cout << "Assigned Projects: ";
-            for(auto projectId : assignedProjects){
+            for (auto projectId : assignedProjects) {
                 cout << projectId << " ";
             }
             cout << endl;
@@ -45,17 +45,18 @@ public:
     string name;
     string description;
     int assignedEmployeeId;
-    string assignedEmployee;
+    int budget;
 
-    Project(int id, string name, string description, int assignedEmployeeId) {
+    Project(int id, string name, string description, int assignedEmployeeId, int budget) {
         this->id = id;
         this->name = name;
         this->description = description;
-        this->assignedEmployeeId = assignedEmployeeId; 
+        this->assignedEmployeeId = assignedEmployeeId;
+        this->budget = budget;
     }
 
     void displayProject() {
-        cout << "ID: " << id << ", Name: " << name << ", Description: " << description << endl;
+        cout << "ID: " << id << ", Name: " << name << ", Description: " << description << ", Budget: $" << budget << endl;
     }
 };
 
@@ -70,6 +71,8 @@ public:
     void viewEmployees();
     void addProject();
     void viewProjects();
+    void saveData(); // Save employees and projects to file
+    void loadData(); // Load employees and projects from file
 };
 
 void Admin::addEmployee() {
@@ -130,14 +133,14 @@ void Admin::addProject() {
 
     bool employeeFound = false;
 
-    for(auto& employee : employees){
-        if(employee.id == emp_id){
+    for (auto& employee : employees) {
+        if (employee.id == emp_id) {
 
             employeeFound = true;
 
             cout << "\nEnter Project ID: ";
             cin >> id;
-            cin.ignore(); 
+            cin.ignore();
             employee.assignProject(id);
             cout << "Enter Project Name: ";
             getline(cin, name);
@@ -146,15 +149,14 @@ void Admin::addProject() {
             cout << "Enter the budget of the project: ";
             cin >> budget;
 
-            projects.push_back(Project(id, name, description, emp_id));
+            projects.push_back(Project(id, name, description, emp_id, budget));
             cout << "Project added successfully!\n";
         }
     }
-    if (!employeeFound)
-    {
-        cout << "No employee found with that id";
+    if (!employeeFound) {
+        cout << "No employee found with that id\n";
     }
-    
+
     cout << endl;
 }
 
@@ -169,8 +171,91 @@ void Admin::viewProjects() {
     }
 }
 
+void Admin::saveData() {
+    ofstream employeeFile("employees.txt");
+    ofstream projectFile("projects.txt");
+
+    // Save employees
+    for (const auto& emp : employees) {
+        employeeFile << emp.id << "," << emp.name << "," << emp.role << endl;
+    }
+
+    // Save projects
+    for (const auto& proj : projects) {
+        projectFile << proj.id << "," << proj.name << "," << proj.description << "," << proj.assignedEmployeeId << "," << proj.budget << endl;
+    }
+
+    cout << "Data saved successfully!\n";
+
+    employeeFile.close();
+    projectFile.close();
+}
+
+void Admin::loadData() {
+    ifstream employeeFile("employees.txt");
+    ifstream projectFile("projects.txt");
+
+    // Load employees
+    if (employeeFile.is_open()) {
+        string line;
+        while (getline(employeeFile, line)) {
+            int id;
+            string name, role;
+
+            // Parse employee data from line (CSV format)
+            size_t pos = 0;
+            pos = line.find(",");
+            id = stoi(line.substr(0, pos));
+            line.erase(0, pos + 1);
+
+            pos = line.find(",");
+            name = line.substr(0, pos);
+            line.erase(0, pos + 1);
+
+            role = line;
+
+            employees.push_back(Employee(id, name, role));
+        }
+        employeeFile.close();
+    }
+
+    // Load projects
+    if (projectFile.is_open()) {
+        string line;
+        while (getline(projectFile, line)) {
+            int id, assignedEmployeeId, budget;
+            string name, description;
+            
+            size_t pos = 0;
+            pos = line.find(",");
+            id = stoi(line.substr(0, pos)); //convert string to int using stoi
+            line.erase(0, pos + 1);
+
+            pos = line.find(",");
+            name = line.substr(0, pos);
+            line.erase(0, pos + 1);
+
+            pos = line.find(",");
+            description = line.substr(0, pos);
+            line.erase(0, pos + 1);
+
+            pos = line.find(",");
+            assignedEmployeeId = stoi(line.substr(0, pos));
+            line.erase(0, pos + 1);
+
+            budget = stoi(line);
+
+            projects.push_back(Project(id, name, description, assignedEmployeeId, budget));
+        }
+        projectFile.close();
+    }
+
+    cout << "Data loaded successfully!\n";
+}
+
 void adminMenu() {
     Admin admin;
+    admin.loadData();  // Load data when the program starts
     int adminChoice;
 
     do {
@@ -188,7 +273,7 @@ void adminMenu() {
         cout << "\t\t|                                               |\n"; 
         cout << "\t\t|\t\t 5) VIEW PROJECTS               |\n"; 
         cout << "\t\t|                                               |\n"; 
-        cout << "\t\t|\t\t 6) EXIT                        |\n"; 
+        cout << "\t\t|\t\t 6) SAVE & EXIT                 |\n"; 
         cout << "\t\t|-----------------------------------------------|\n";
         cout << endl;
         cout << "Enter your choice: ";
@@ -211,6 +296,7 @@ void adminMenu() {
             admin.viewProjects();
             break;
         case 6:
+            admin.saveData(); // Save data before exiting
             cout << "Exiting admin menu...\n";
             break;
         default:
@@ -218,5 +304,4 @@ void adminMenu() {
         }
     } while (adminChoice != 6);
 }
-
 
