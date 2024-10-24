@@ -25,8 +25,6 @@ int main() {
         cout << "\t\t|                                               |\n"; 
         cout << "\t\t|\t\t 2) EMPLOYEE                    |\n"; 
         cout << "\t\t|                                               |\n"; 
-        cout << "\t\t|\t\t 3) GENERATE REPORT             |\n"; 
-        cout << "\t\t|                                               |\n"; 
         cout << "\t\t|\t\t 4) EXIT                        |\n"; 
         cout << "\t\t|-----------------------------------------------|\n";
 
@@ -49,14 +47,12 @@ int main() {
             employeeMenu();
             break;
         case 3:
-            break;
-        case 4:
             cout << "Exiting the program. Goodbye!\n";
             break;
         default:
             cout << "Invalid choice, please try again.\n";
         }
-    } while (mainMenuCh != 4);
+    } while (mainMenuCh != 3);
 
     return 0;
 }
