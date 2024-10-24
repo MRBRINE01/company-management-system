@@ -10,6 +10,8 @@ int main() {
     string adminpass = "admin123";
     string enteredpass;
 
+
+
     do {
         cout << "\n\t\t|-----------------------------------------------|\n";
         cout << "\t\t|                                               |\n"; 
@@ -36,11 +38,11 @@ int main() {
             cin >> enteredpass;
             if (enteredpass == adminpass)
             {
-                cout << "Access successfully granted.";
+                cout << "Access granted.\n";
                 adminMenu();
             }
             else{
-                cout << "Access Denied.";
+                cout << "Access Denied.\n";
             }
             break;
         case 2:

@@ -10,21 +10,30 @@ public:
     int id;
     string name;
     string role;
+    string username;
+    string password;
     vector<int> assignedProjects;
 
-    Employee(int id, string name, string role) {
+    Employee(int id, string name, string role, string username, string password) {
         //When you use this->, you're explicitly referring to a member (like a variable or method) of the current object that called the function.
         this->id = id;
         this->name = name;
         this->role = role;
+        this->username = username;
+        this->password = password; 
     }
 
-    void assignProject(int projectId) {
+    void assignProject(int projectId);
+
+    void displayEmployee();
+};
+
+void Employee::assignProject(int projectId) {
         assignedProjects.push_back(projectId);
         cout << "Project ID " << projectId << " assigned to employee " << name << endl;
     }
 
-    void displayEmployee() {
+void Employee::displayEmployee(){
         cout << "ID: " << id << ", Name: " << name << ", Role: " << role << endl;
         if (assignedProjects.empty()) {
             cout << "No project assigned.\n";
@@ -37,7 +46,6 @@ public:
             cout << endl;
         }
     }
-};
 
 class Project {
 public:
@@ -72,12 +80,15 @@ public:
     void addProject();
     void viewProjects();
     void saveData(); // Save employees and projects to file
-    void loadData(); // Load employees and projects from file
+    void loadData();
+    // Load employees and projects from file
 };
+
+
 
 void Admin::addEmployee() {
     int id;
-    string name, role;
+    string name, role, username, password;
 
     cout << "\nEnter Employee ID: ";
     cin >> id;
@@ -86,8 +97,12 @@ void Admin::addEmployee() {
     getline(cin, name);
     cout << "Enter Employee Role: ";
     getline(cin, role);
+    cout << "Enter Employee Username: ";
+    getline(cin, username);
+    cout << "Enter Employee Password: ";
+    getline(cin, password);
 
-    employees.push_back(Employee(id, name, role));
+    employees.push_back(Employee(id, name, role, username, password));
     cout << "Employee added successfully!\n";
 }
 
@@ -191,7 +206,7 @@ void Admin::saveData() {
 
     // Save employees
     for (const auto& emp : employees) {
-        employeeFile << emp.id << "," << emp.name << "," << emp.role << endl;
+       employeeFile << emp.id << "," << emp.name << "," << emp.role << "," << emp.username << "," << emp.password << endl;
     }
 
     // Save projects
@@ -214,9 +229,8 @@ void Admin::loadData() {
         string line;
         while (getline(employeeFile, line)) {
             int id;
-            string name, role;
+            string name, role, username, password;
 
-            // Parse employee data from line (CSV format)
             size_t pos = 0;
             pos = line.find(",");
             id = stoi(line.substr(0, pos));
@@ -226,9 +240,17 @@ void Admin::loadData() {
             name = line.substr(0, pos);
             line.erase(0, pos + 1);
 
-            role = line;
+            pos = line.find(",");
+            role = line.substr(0, pos);
+            line.erase(0, pos + 1);
 
-            employees.push_back(Employee(id, name, role));
+            pos = line.find(",");
+            username = line.substr(0, pos);
+            line.erase(0, pos + 1);
+
+            password = line; // Remaining part is the password
+
+            employees.push_back(Employee(id, name, role, username, password));
         }
         employeeFile.close();
     }
@@ -271,9 +293,6 @@ void adminMenu() {
     Admin admin;
     admin.loadData();  // Load data when the program starts
     int adminChoice;
-
-    
-
 
     do {
         cout << "\n\t\t|-----------------------------------------------|\n";

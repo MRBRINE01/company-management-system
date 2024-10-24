@@ -4,6 +4,144 @@
 #include <fstream>
 using namespace std;
 
+class Employee {
+public:
+    int id;
+    string name;
+    string role;
+    string username;
+    string password;
+    vector<int> assignedProjects;
+
+    Employee(int id, string name, string role, string username, string password) {
+        //When you use this->, you're explicitly referring to a member (like a variable or method) of the current object that called the function.
+        this->id = id;
+        this->name = name;
+        this->role = role;
+        this->username = username;
+        this->password = password; 
+    }
+};
+
+class Project {
+public:
+    int id;
+    string name;
+    string description;
+    int assignedEmployeeId;
+    int budget;
+
+    Project(int id, string name, string description, int assignedEmployeeId, int budget) {
+        this->id = id;
+        this->name = name;
+        this->description = description;
+        this->assignedEmployeeId = assignedEmployeeId;
+        this->budget = budget;
+    }
+
+    void displayProject() {
+        cout << "ID: " << id << ", Name: " << name << ", Description: " << description << ", Budget: $" << budget << endl;
+    }
+
+};
+
+class Admin {
+private:
+    vector<Employee> employees;
+    vector<Project> projects;
+    
+public:
+    bool employeeLogin();
+    void LoadData();
+};
+
+void Admin::LoadData() {
+    ifstream employeeFile("employees.txt");
+    ifstream projectFile("projects.txt");
+
+    // Load employees
+    if (employeeFile.is_open()) {
+        string line;
+        while (getline(employeeFile, line)) {
+            int id;
+            string name, role, username, password;
+
+            size_t pos = 0;
+            pos = line.find(",");
+            id = stoi(line.substr(0, pos));
+            line.erase(0, pos + 1);
+
+            pos = line.find(",");
+            name = line.substr(0, pos);
+            line.erase(0, pos + 1);
+
+            pos = line.find(",");
+            role = line.substr(0, pos);
+            line.erase(0, pos + 1);
+
+            pos = line.find(",");
+            username = line.substr(0, pos);
+            line.erase(0, pos + 1);
+
+            password = line; // Remaining part is the password
+
+            employees.push_back(Employee(id, name, role, username, password));
+        }
+        employeeFile.close();
+    }
+
+    // Load projects
+    if (projectFile.is_open()) {
+        string line;
+        while (getline(projectFile, line)) {
+            int id, assignedEmployeeId, budget;
+            string name, description;
+            
+            size_t pos = 0;
+            pos = line.find(",");
+            id = stoi(line.substr(0, pos)); //convert string to int using stoi
+            line.erase(0, pos + 1);
+
+            pos = line.find(",");
+            name = line.substr(0, pos);
+            line.erase(0, pos + 1);
+
+            pos = line.find(",");
+            description = line.substr(0, pos);
+            line.erase(0, pos + 1);
+
+            pos = line.find(",");
+            assignedEmployeeId = stoi(line.substr(0, pos));
+            line.erase(0, pos + 1);
+
+            budget = stoi(line);
+
+            projects.push_back(Project(id, name, description, assignedEmployeeId, budget));
+        }
+        projectFile.close();
+    }
+
+    cout << "Data loaded successfully!\n";
+}
+
+bool Admin::employeeLogin() {
+    string username, password;
+    cout << "Enter username: ";
+    cin >> username;
+    cout << "Enter password: ";
+    cin >> password;
+
+    for (const auto& emp : employees) {
+        if (emp.username == username && emp.password == password) {
+            cout << "Login successful! Welcome " << emp.name << ".\n";
+            return true;  // Successful login
+        }
+    }
+    cout << "Invalid username or password. Please try again.\n";
+    return false;  // Login failed
+}
+
+
 class employee_log {
 private:
     int logId;
@@ -27,7 +165,9 @@ public:
     void displayLog();
     bool viewLogById(int logIdToView);
     
-    int getLogId() { return logId; }
+    int getLogId() { return logId; };
+
+
 
     void saveLogToFile() {
         ofstream logFile("logs.txt", ios::app); // Open in append mode
@@ -103,6 +243,8 @@ public:
         }
     }
 };
+
+
 
 // Function to create a new log entry
 void employee_log::createLog(int newLogId) {
@@ -191,10 +333,22 @@ void employeeMenu() {
     // Load logs from file at the beginning
     vector<employee_log> logs = employee_log::loadLogsFromFile(maxLogId);
     employee_log newlog; 
+    Admin admin;
 
     int logIdToEditOrDelete;
     int logIdToView;
 
+    bool loginSucess = false;
+
+    admin.LoadData();
+
+
+        loginSucess = admin.employeeLogin();
+
+
+
+    if (loginSucess)
+    {
     do {
         cout << "\n\t\t|-----------------------------------------------|\n";
         cout << "\t\t|\t Choose your option:\t                |\n"; 
@@ -275,4 +429,6 @@ void employeeMenu() {
                 cout << "Invalid choice, please try again.\n";
         }
     } while (adminChoice != 6);  
+    }
+
 }
