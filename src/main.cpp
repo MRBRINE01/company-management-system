@@ -7,6 +7,11 @@ using namespace std;
 int main() {
     int mainMenuCh;
 
+    string adminpass = "admin123";
+    string enteredpass;
+
+
+
     do {
         cout << "\n\t\t|-----------------------------------------------|\n";
         cout << "\t\t|                                               |\n"; 
@@ -20,14 +25,23 @@ int main() {
         cout << "\t\t|                                               |\n"; 
         cout << "\t\t|\t\t 2) EMPLOYEE                    |\n"; 
         cout << "\t\t|                                               |\n"; 
-        cout << "\t\t|\t\t 3) EXIT                        |\n"; 
+        cout << "\t\t|\t\t 4) EXIT                        |\n"; 
         cout << "\t\t|-----------------------------------------------|\n";
 
         cin >> mainMenuCh;
 
         switch (mainMenuCh) {
         case 1: 
-            adminMenu();
+            cout << "Enter the password for the Admin: ";
+            cin >> enteredpass;
+            if (enteredpass == adminpass)
+            {
+                cout << "Access granted.\n";
+                adminMenu();
+            }
+            else{
+                cout << "Access Denied.\n";
+            }
             break;
         case 2:
             employeeMenu();

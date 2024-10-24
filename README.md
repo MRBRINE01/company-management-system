@@ -4,5 +4,4 @@ COMPILE THE CODE USING THE COMMAND "g++ main.cpp admin\admin_main.cpp employee\e
 
 RUN THE .EXE FILE USING THE COMMAND ".\company_management_system.exe"
 
-
-To update data in json we are using https://github.com/nlohmann/json
+COMBINED COMMAND "g++ main.cpp admin\admin_main.cpp employee\employee_main.cpp -o company_management_system && .\company_management_system.exe"
