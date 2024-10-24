@@ -12,39 +12,41 @@ public:
     string role;
     string username;
     string password;
+    float salary;  // New salary field
     vector<int> assignedProjects;
 
-    Employee(int id, string name, string role, string username, string password) {
-        //When you use this->, you're explicitly referring to a member (like a variable or method) of the current object that called the function.
+    // Modified constructor to accept salary
+    Employee(int id, string name, string role, string username, string password, float salary) {
         this->id = id;
         this->name = name;
         this->role = role;
         this->username = username;
-        this->password = password; 
+        this->password = password;
+        this->salary = salary;  // Store salary
     }
 
     void assignProject(int projectId);
-
     void displayEmployee();
 };
+
+// Modify the displayEmployee method to show salary
+void Employee::displayEmployee() {
+    cout << "ID: " << id << ", Name: " << name << ", Role: " << role << ", Salary: $" << salary << endl;
+    if (assignedProjects.empty()) {
+        cout << "No project assigned.\n";
+    } else {
+        cout << "Assigned Projects: ";
+        for (auto projectId : assignedProjects) {
+            cout << projectId << " ";
+        }
+        cout << endl;
+    }
+}
+
 
 void Employee::assignProject(int projectId) {
         assignedProjects.push_back(projectId);
         cout << "Project ID " << projectId << " assigned to employee " << name << endl;
-    }
-
-void Employee::displayEmployee(){
-        cout << "ID: " << id << ", Name: " << name << ", Role: " << role << endl;
-        if (assignedProjects.empty()) {
-            cout << "No project assigned.\n";
-        }
-        else {
-            cout << "Assigned Projects: ";
-            for (auto projectId : assignedProjects) {
-                cout << projectId << " ";
-            }
-            cout << endl;
-        }
     }
 
 class Project {
@@ -89,6 +91,7 @@ public:
 void Admin::addEmployee() {
     int id;
     string name, role, username, password;
+    float salary;  // New salary field
 
     cout << "\nEnter Employee ID: ";
     cin >> id;
@@ -101,10 +104,14 @@ void Admin::addEmployee() {
     getline(cin, username);
     cout << "Enter Employee Password: ";
     getline(cin, password);
+    cout << "Enter Employee Salary: ";
+    cin >> salary;
 
-    employees.push_back(Employee(id, name, role, username, password));
+    // Pass salary to the constructor
+    employees.push_back(Employee(id, name, role, username, password, salary));
     cout << "Employee added successfully!\n";
 }
+
 
 void Admin::removeEmployee() {
     int id;
@@ -206,9 +213,10 @@ void Admin::saveData() {
 
     // Save employees
     for (const auto& emp : employees) {
-       employeeFile << emp.id << "," << emp.name << "," << emp.role << "," << emp.username << "," << emp.password;
+        employeeFile << emp.id << "," << emp.name << "," << emp.role << "," 
+                     << emp.username << "," << emp.password << "," << emp.salary;  // Save salary
         if (!emp.assignedProjects.empty()) {
-            employeeFile << ","; // Add a comma before listing project IDs
+            employeeFile << ",";  // Add a comma before listing project IDs
             for (size_t i = 0; i < emp.assignedProjects.size(); i++) {
                 employeeFile << emp.assignedProjects[i];
                 if (i != emp.assignedProjects.size() - 1) {
@@ -216,9 +224,8 @@ void Admin::saveData() {
                 }
             }
         }
-        employeeFile << endl; // Move to the next line for the next employee
+        employeeFile << endl;  // Move to the next line for the next employee
     }
-    
 
     // Save projects
     for (const auto& proj : projects) {
@@ -241,6 +248,7 @@ void Admin::loadData() {
         while (getline(employeeFile, line)) {
             int id;
             string name, role, username, password;
+            float salary;
             vector<int> assignedProjects;
 
             size_t pos = 0;
@@ -264,6 +272,10 @@ void Admin::loadData() {
             password = line.substr(0, pos);
             line.erase(0, pos + 1);
 
+            pos = line.find(",");
+            salary = stof(line.substr(0, pos));  // Read salary
+            line.erase(0, pos + 1);
+
             // Parse the assigned projects (if any)
             while (!line.empty()) {
                 pos = line.find(",");
@@ -276,7 +288,7 @@ void Admin::loadData() {
                 }
             }
 
-            employees.push_back(Employee(id, name, role, username, password));
+            employees.push_back(Employee(id, name, role, username, password, salary));
             employees.back().assignedProjects = assignedProjects;
         }
         employeeFile.close();

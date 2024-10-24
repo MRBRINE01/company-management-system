@@ -11,19 +11,23 @@ public:
     string role;
     string username;
     string password;
+    float salary;  // New salary field
     vector<int> assignedProjects;
 
-    Employee() : id(0), name(""), role(""), username(""), password("") {}
-
-    Employee(int id, string name, string role, string username, string password, vector<int> assignedProjects = {}) {
-        //When you use this->, you're explicitly referring to a member (like a variable or method) of the current object that called the function.
+    // Modified constructor to accept salary
+    Employee(int id, string name, string role, string username, string password, float salary) {
         this->id = id;
         this->name = name;
         this->role = role;
         this->username = username;
-        this->password = password; 
-        this->assignedProjects = assignedProjects;
+        this->password = password;
+        this->salary = salary;  // Store salary
     }
+
+    void assignProject(int projectId);
+    void displayEmployee();
+
+    Employee() : id(0), name(""), role(""), username(""), password("") {}
 
 };
 
@@ -69,49 +73,48 @@ void Admin::LoadData() {
         while (getline(employeeFile, line)) {
             int id;
             string name, role, username, password;
+            float salary;
             vector<int> assignedProjects;
 
-            try {
-                size_t pos = 0;
-                pos = line.find(",");
-                id = stoi(line.substr(0, pos));  // Convert ID to integer
-                line.erase(0, pos + 1);
+            size_t pos = 0;
+            pos = line.find(",");
+            id = stoi(line.substr(0, pos));
+            line.erase(0, pos + 1);
 
-                pos = line.find(",");
-                name = line.substr(0, pos);  // Extract name
-                line.erase(0, pos + 1);
+            pos = line.find(",");
+            name = line.substr(0, pos);
+            line.erase(0, pos + 1);
 
-                pos = line.find(",");
-                role = line.substr(0, pos);  // Extract role
-                line.erase(0, pos + 1);
+            pos = line.find(",");
+            role = line.substr(0, pos);
+            line.erase(0, pos + 1);
 
-                pos = line.find(",");
-                username = line.substr(0, pos);  // Extract username
-                line.erase(0, pos + 1);
+            pos = line.find(",");
+            username = line.substr(0, pos);
+            line.erase(0, pos + 1);
 
-                pos = line.find(",");
-                password = line.substr(0, pos);  // Extract password
-                line.erase(0, pos + 1);
+            pos = line.find(",");
+            password = line.substr(0, pos);
+            line.erase(0, pos + 1);
 
-                // Parse the assigned projects (if any)
-                while (!line.empty()) {
-                    pos = line.find(",");
-                    if (pos != string::npos) {
-                        assignedProjects.push_back(stoi(line.substr(0, pos)));
-                        line.erase(0, pos + 1);
-                    } else {
-                        assignedProjects.push_back(stoi(line));
-                        line.clear();
-                    }
+            pos = line.find(",");
+            salary = stof(line.substr(0, pos));  // Read salary
+            line.erase(0, pos + 1);
+
+            // Parse the assigned projects (if any)
+            while (!line.empty()) {
+                pos = line.find(",");
+                if (pos != string::npos) {
+                    assignedProjects.push_back(stoi(line.substr(0, pos)));
+                    line.erase(0, pos + 1);
+                } else {
+                    assignedProjects.push_back(stoi(line));
+                    line.clear();
                 }
-                
+            }
 
-                employees.push_back(Employee(id, name, role, username, password, assignedProjects));
-            }
-            catch (const invalid_argument& e) {
-                cout << "Error: Invalid data in employee file: " << e.what() << endl;
-                // Handle the error (e.g., skip the invalid entry, or exit)
-            }
+            employees.push_back(Employee(id, name, role, username, password, salary));
+            employees.back().assignedProjects = assignedProjects;
         }
         employeeFile.close();
     }
