@@ -13,14 +13,18 @@ public:
     string password;
     vector<int> assignedProjects;
 
-    Employee(int id, string name, string role, string username, string password) {
+    Employee() : id(0), name(""), role(""), username(""), password("") {}
+
+    Employee(int id, string name, string role, string username, string password, vector<int> assignedProjects = {}) {
         //When you use this->, you're explicitly referring to a member (like a variable or method) of the current object that called the function.
         this->id = id;
         this->name = name;
         this->role = role;
         this->username = username;
         this->password = password; 
+        this->assignedProjects = assignedProjects;
     }
+
 };
 
 class Project {
@@ -51,7 +55,7 @@ private:
     vector<Project> projects;
     
 public:
-    bool employeeLogin();
+    Employee employeeLogin();
     void LoadData();
 };
 
@@ -65,27 +69,49 @@ void Admin::LoadData() {
         while (getline(employeeFile, line)) {
             int id;
             string name, role, username, password;
+            vector<int> assignedProjects;
 
-            size_t pos = 0;
-            pos = line.find(",");
-            id = stoi(line.substr(0, pos));
-            line.erase(0, pos + 1);
+            try {
+                size_t pos = 0;
+                pos = line.find(",");
+                id = stoi(line.substr(0, pos));  // Convert ID to integer
+                line.erase(0, pos + 1);
 
-            pos = line.find(",");
-            name = line.substr(0, pos);
-            line.erase(0, pos + 1);
+                pos = line.find(",");
+                name = line.substr(0, pos);  // Extract name
+                line.erase(0, pos + 1);
 
-            pos = line.find(",");
-            role = line.substr(0, pos);
-            line.erase(0, pos + 1);
+                pos = line.find(",");
+                role = line.substr(0, pos);  // Extract role
+                line.erase(0, pos + 1);
 
-            pos = line.find(",");
-            username = line.substr(0, pos);
-            line.erase(0, pos + 1);
+                pos = line.find(",");
+                username = line.substr(0, pos);  // Extract username
+                line.erase(0, pos + 1);
 
-            password = line; // Remaining part is the password
+                pos = line.find(",");
+                password = line.substr(0, pos);  // Extract password
+                line.erase(0, pos + 1);
 
-            employees.push_back(Employee(id, name, role, username, password));
+                // Parse the assigned projects (if any)
+                while (!line.empty()) {
+                    pos = line.find(",");
+                    if (pos != string::npos) {
+                        assignedProjects.push_back(stoi(line.substr(0, pos)));
+                        line.erase(0, pos + 1);
+                    } else {
+                        assignedProjects.push_back(stoi(line));
+                        line.clear();
+                    }
+                }
+                
+
+                employees.push_back(Employee(id, name, role, username, password, assignedProjects));
+            }
+            catch (const invalid_argument& e) {
+                cout << "Error: Invalid data in employee file: " << e.what() << endl;
+                // Handle the error (e.g., skip the invalid entry, or exit)
+            }
         }
         employeeFile.close();
     }
@@ -96,27 +122,33 @@ void Admin::LoadData() {
         while (getline(projectFile, line)) {
             int id, assignedEmployeeId, budget;
             string name, description;
-            
-            size_t pos = 0;
-            pos = line.find(",");
-            id = stoi(line.substr(0, pos)); //convert string to int using stoi
-            line.erase(0, pos + 1);
 
-            pos = line.find(",");
-            name = line.substr(0, pos);
-            line.erase(0, pos + 1);
+            try {
+                size_t pos = 0;
+                pos = line.find(",");
+                id = stoi(line.substr(0, pos));  // Convert project ID to integer
+                line.erase(0, pos + 1);
 
-            pos = line.find(",");
-            description = line.substr(0, pos);
-            line.erase(0, pos + 1);
+                pos = line.find(",");
+                name = line.substr(0, pos);  // Extract project name
+                line.erase(0, pos + 1);
 
-            pos = line.find(",");
-            assignedEmployeeId = stoi(line.substr(0, pos));
-            line.erase(0, pos + 1);
+                pos = line.find(",");
+                description = line.substr(0, pos);  // Extract description
+                line.erase(0, pos + 1);
 
-            budget = stoi(line);
+                pos = line.find(",");
+                assignedEmployeeId = stoi(line.substr(0, pos));  // Convert employee ID to integer
+                line.erase(0, pos + 1);
 
-            projects.push_back(Project(id, name, description, assignedEmployeeId, budget));
+                budget = stoi(line);  // Convert budget to integer
+
+                projects.push_back(Project(id, name, description, assignedEmployeeId, budget));
+            }
+            catch (const invalid_argument& e) {
+                cout << "Error: Invalid data in project file: " << e.what() << endl;
+                // Handle the error (e.g., skip the invalid entry, or exit)
+            }
         }
         projectFile.close();
     }
@@ -124,21 +156,22 @@ void Admin::LoadData() {
     cout << "Data loaded successfully!\n";
 }
 
-bool Admin::employeeLogin() {
+
+Employee Admin::employeeLogin() {
     string username, password;
     cout << "Enter username: ";
     cin >> username;
     cout << "Enter password: ";
     cin >> password;
 
-    for (const auto& emp : employees) {
+    for (auto& emp : employees) {  // Notice 'auto&' to get a reference to employee
         if (emp.username == username && emp.password == password) {
             cout << "Login successful! Welcome " << emp.name << ".\n";
-            return true;  // Successful login
+            return emp;  // Return pointer to the logged-in employee
         }
     }
     cout << "Invalid username or password. Please try again.\n";
-    return false;  // Login failed
+    return Employee();  // Return nullptr if login fails
 }
 
 
@@ -159,7 +192,7 @@ public:
         this->details = details;
         this->isCompleted = isCompleted;
     }
-    void createLog(int newLogId);
+    bool createLog(int newLogId, const vector<int>& assignedProjects);
     bool deleteLog(int logIdToDelete);
     bool editLog(int logIdToEdit);
     void displayLog();
@@ -247,7 +280,7 @@ public:
 
 
 // Function to create a new log entry
-void employee_log::createLog(int newLogId) {
+bool employee_log::createLog(int newLogId, const vector<int>& assignedProjects) {
     cout << "\n\t\t|-----------------------------------------------|\n";
     cout << "\t\t|\t Enter Log Details:\t                |\n";
     cout << "\t\t|-----------------------------------------------|\n";
@@ -256,6 +289,19 @@ void employee_log::createLog(int newLogId) {
 
     cout << "Enter Project ID: ";
     cin >> projectId;
+
+    // bool projectAssigned = false;
+    // for (int assignedProject : assignedProjects) {
+    //     if (assignedProject == projectId) {
+    //         projectAssigned = true;
+    //         break;
+    //     }
+    // }
+
+    // if (!projectAssigned) {
+    //     cout << "You are not assigned to this project. Log cannot be created.\n";
+    //     return false;
+    // }
 
     cout << "Enter Hours Worked: ";
     cin >> HoursWorked;
@@ -266,6 +312,8 @@ void employee_log::createLog(int newLogId) {
 
     cout << "Is Project completed? (yes or no): ";
     cin >> isCompleted;
+
+    return true;
 }
 
 // Function to delete a log based on logId
@@ -326,29 +374,38 @@ void employee_log::displayLog() {
 
 // Menu function for employee log management
 void employeeMenu() {
-    int adminChoice;
-    bool flag;
-    int maxLogId = 0;
+    
 
     // Load logs from file at the beginning
-    vector<employee_log> logs = employee_log::loadLogsFromFile(maxLogId);
-    employee_log newlog; 
+    
     Admin admin;
-
-    int logIdToEditOrDelete;
-    int logIdToView;
 
     bool loginSucess = false;
 
     admin.LoadData();
 
+    Employee emp = admin.employeeLogin();
 
-        loginSucess = admin.employeeLogin();
-
-
-
-    if (loginSucess)
+    if (emp.id != 0)
     {
+        int adminChoice;
+        bool flag;
+        bool addflag;
+        int maxLogId = 0;
+
+        vector<employee_log> logs = employee_log::loadLogsFromFile(maxLogId);
+        employee_log newlog; 
+
+        int logIdToEditOrDelete;
+        int logIdToView;
+
+        Employee emp;
+
+        vector<int> assignedProjects = emp.assignedProjects;
+
+        for(auto ass : assignedProjects ){cout<<"a"<<ass;}
+
+
     do {
         cout << "\n\t\t|-----------------------------------------------|\n";
         cout << "\t\t|\t Choose your option:\t                |\n"; 
@@ -373,9 +430,12 @@ void employeeMenu() {
 
         switch (adminChoice) {
             case 1:
-                newlog.createLog(++maxLogId);
-                logs.push_back(newlog);
-                newlog.saveLogToFile();  // Save new log to file
+                    newlog.createLog(++maxLogId, assignedProjects);
+
+                    logs.push_back(newlog);
+                    newlog.saveLogToFile();  // Save new log to file
+
+                
                 break;
             case 2:
                 cout << "Enter Log ID to Delete: ";

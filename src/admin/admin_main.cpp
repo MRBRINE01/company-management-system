@@ -206,8 +206,19 @@ void Admin::saveData() {
 
     // Save employees
     for (const auto& emp : employees) {
-       employeeFile << emp.id << "," << emp.name << "," << emp.role << "," << emp.username << "," << emp.password << endl;
+       employeeFile << emp.id << "," << emp.name << "," << emp.role << "," << emp.username << "," << emp.password;
+        if (!emp.assignedProjects.empty()) {
+            employeeFile << ","; // Add a comma before listing project IDs
+            for (size_t i = 0; i < emp.assignedProjects.size(); i++) {
+                employeeFile << emp.assignedProjects[i];
+                if (i != emp.assignedProjects.size() - 1) {
+                    employeeFile << ",";  // Add a comma between project IDs
+                }
+            }
+        }
+        employeeFile << endl; // Move to the next line for the next employee
     }
+    
 
     // Save projects
     for (const auto& proj : projects) {
@@ -230,6 +241,7 @@ void Admin::loadData() {
         while (getline(employeeFile, line)) {
             int id;
             string name, role, username, password;
+            vector<int> assignedProjects;
 
             size_t pos = 0;
             pos = line.find(",");
@@ -248,9 +260,24 @@ void Admin::loadData() {
             username = line.substr(0, pos);
             line.erase(0, pos + 1);
 
-            password = line; // Remaining part is the password
+            pos = line.find(",");
+            password = line.substr(0, pos);
+            line.erase(0, pos + 1);
+
+            // Parse the assigned projects (if any)
+            while (!line.empty()) {
+                pos = line.find(",");
+                if (pos != string::npos) {
+                    assignedProjects.push_back(stoi(line.substr(0, pos)));
+                    line.erase(0, pos + 1);
+                } else {
+                    assignedProjects.push_back(stoi(line));
+                    line.clear();
+                }
+            }
 
             employees.push_back(Employee(id, name, role, username, password));
+            employees.back().assignedProjects = assignedProjects;
         }
         employeeFile.close();
     }
